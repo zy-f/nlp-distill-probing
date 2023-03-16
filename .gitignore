@@ -1,0 +1,15 @@
+# byte_compiled
+__pycache__/
+
+# jupyter
+.ipynb_checkpoints
+
+# project-specific logs and data
+checkpoints/
+logs/
+data/*/
+# ^ note: keeps the probe_outputs file
+
+# scrap files
+playground.ipynb
+junglegym.ipynb

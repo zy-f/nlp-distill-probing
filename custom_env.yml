@@ -1,0 +1,21 @@
+name: j
+channels:
+  - conda-forge
+  - pytorch
+  - huggingface
+  - nvidia
+  - anaconda
+dependencies:
+  - pytorch
+  - pytorch-cuda=11.6
+  - jupyterlab
+  - notebook
+  - matplotlib
+  - numpy
+  - pandas
+  - transformers
+  - datasets
+  - tqdm
+  - pip
+  - pip:
+    - tensorboard
