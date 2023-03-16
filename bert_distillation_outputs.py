@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 import torch
 import numpy as np
 from tqdm import tqdm
-from utils import mnli_tok_func
+from utils import get_nli_tok_func
 
 def get_bert_logits(dset_name='multi_nli'):
     '''
@@ -25,7 +25,7 @@ def main():
 
     # tokenize
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-    tok_func = lambda ex: mnli_tok_func(ex, tokenizer)
+    tok_func = get_nli_tok_func(tokenizer)
     mnli_tok = mnli_raw.map(tok_func, batched=True)
     
     bsz = 64

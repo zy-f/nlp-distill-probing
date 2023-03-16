@@ -7,6 +7,7 @@ UPOS_TAGS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CCONJ', 'DET', 'INTJ', 'NOUN', 'NUM', 
 UPOS_TAG_TO_ID = {UPOS_TAGS[i] : i for i in range(len(UPOS_TAGS))}
 DEP_TAGS = ['acl', 'acl:relcl', 'advcl', 'advcl:relcl', 'advmod', 'amod', 'appos', 'aux', 'aux:pass', 'case', 'cc', 'cc:preconj', 'ccomp', 'compound', 'compound:prt', 'conj', 'cop', 'csubj', 'csubj:outer', 'csubj:pass', 'dep', 'det', 'det:predet', 'discourse', 'dislocated', 'expl', 'fixed', 'flat', 'flat:foreign', 'goeswith', 'iobj', 'list', 'mark', 'nmod', 'nmod:npmod', 'nmod:poss', 'nmod:tmod', 'nsubj', 'nsubj:outer', 'nsubj:pass', 'nummod', 'obj', 'obl', 'obl:npmod', 'obl:tmod', 'orphan', 'parataxis', 'punct', 'reparandum', 'root', 'vocative', 'xcomp']
 DEP_TAG_TO_ID = {DEP_TAGS[i] : i for i in range(len(DEP_TAGS))}
+NLI_LABEL_MAP = {'entailment': 0, 'neutral': 1, 'contradiction': 2}
 
 # METRICS
 def acc_func(predictions, labels):
@@ -46,7 +47,7 @@ def log_probe_outputs(timestamp, model_info, probe_info, layer_data):
     timestamp: set automatically
     m_arch: model architecture -> {bert, distilbert}
     m_pretrain: model pretraining info -> {mlm}
-    m_finetune: model finetuning info -> {none, mnli, distmnli, <other_nli>, dist<other_nli>}
+    m_finetune: model finetuning info -> {none, mnli, distmnli}
     p_type: type of probe -> {indiv, cond}
     p_task: probe prediction task/label -> {pos, dep}
     '''
@@ -55,6 +56,20 @@ def log_probe_outputs(timestamp, model_info, probe_info, layer_data):
         + [f'layer{ix}' for ix in [0, 1, 4, 5, 6, 10, 11, 12]]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='')
         row_data = {'timestamp':timestamp, **model_info, **probe_info, **layer_data}
+        writer.writerow(row_data)
+    
+def log_generalization_output(row_data):
+    '''
+    dset: generalization dataset tested
+    m_arch: model architecture -> {bert, distilbert}
+    m_pretrain: model pretraining info -> {mlm}
+    m_finetune: model finetuning info -> {none, mnli, distmnli}
+    loss: loss on dataset
+    acc: accuracy on dataset
+    '''
+    with open('data/gen_outputs.csv', 'a') as csvfile:
+        fieldnames = ['dset', 'm_arch', 'm_pretrain', 'm_finetune', 'loss', 'acc']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='')
         writer.writerow(row_data)
     
 # MISC
@@ -76,7 +91,8 @@ class DotDict:
     def _dict(self):
         return self.__dict__
     
-def mnli_tok_func(ex, tokenizer):
-    return tokenizer(text=ex['premise'], text_pair=ex['hypothesis'], 
-                     return_attention_mask=True, return_length=True, return_token_type_ids=True,
-                     truncation='longest_first', padding='max_length', max_length=80)
+def get_nli_tok_func(tokenizer):
+    tok_func = lambda ex: tokenizer(text=ex['premise'], text_pair=ex['hypothesis'], 
+                                    return_attention_mask=True, return_token_type_ids=True,
+                                    truncation='longest_first', padding='max_length', max_length=80)
+    return tok_func

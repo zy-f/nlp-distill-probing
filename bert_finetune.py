@@ -7,7 +7,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from utils import log_metrics, current_pst_time, acc_func
+from utils import log_metrics, current_pst_time, acc_func, get_nli_tok_func
 from tqdm import tqdm, trange
 
 # ==== BIG CODE BLOCKS ====
@@ -63,13 +63,7 @@ def main():
     # load model + tokenizer
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
 
-    def tok_func(ex, tokenizer=tokenizer):
-        return tokenizer(text=ex['premise'], text_pair=ex['hypothesis'], 
-                         return_attention_mask=True, return_length=True, return_token_type_ids=True,
-                         truncation='longest_first', padding='max_length', max_length=80)
-    # padding='max_length' makes lengths uniform
-
-    # text --> tokens --> IDs
+    tok_func = get_nli_tok_func(tokenizer)
     mnli_tok = mnli_raw.map(tok_func, batched=True)
 
     # initialize datasets that contain (input, attention_mask, label)
