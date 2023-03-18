@@ -14,23 +14,23 @@ from distilbert_finetune import DistilBERTLikeDataset, distilbert_epoch_loop
 import json
 
 MODEL_INFO = {
-    'bert_finetune_initial': {
+    'bert_finetune': {
         'm_arch': 'bert',
         'm_pretrain': 'mlm',
         'm_finetune': 'mnli'
     },
 
-    'distilbert_finetune_initial': {
+    'distilbert_finetune': {
         'm_arch': 'distilbert',
         'm_pretrain': 'mlm',
         'm_finetune': 'mnli'
     },
 
-    'distilbert_distfinetune_onlyDistLoss': {
-        'm_arch': 'distilbert',
-        'm_pretrain': 'mlm',
-        'm_finetune': 'distmnli'
-    },
+    # 'distilbert_distfinetune_onlyDistLoss': {
+    #     'm_arch': 'distilbert',
+    #     'm_pretrain': 'mlm',
+    #     'm_finetune': 'distmnli'
+    # },
 
     'distilbert_distfinetune_strongDistLoss': {
         'm_arch': 'distilbert',
@@ -128,10 +128,10 @@ def evaluate_on(full_data_tok, model_file, log_info):
 def main(dset='anli'):
     full_data_tok = get_dataset(dset)
     models = [
-        'bert_finetune_retry',
-        # 'distilbert_finetune_initial',
+        # 'bert_finetune',
+        # 'distilbert_finetune',
         # 'distilbert_distfinetune_onlyDistLoss',
-        # 'distilbert_distfinetune_strongDistLoss'
+        'distilbert_distfinetune_strongDistLoss'
     ]
     for model_file in models:
         log_info = {'dset': dset, **MODEL_INFO[model_file]}
@@ -145,8 +145,8 @@ if __name__ == '__main__':
         # 'dnc-spatial',
         # 'jam',
         # 'snli',
-        # 'anli',
-        # 'hans',
+        'anli',
+        'hans',
         'mnli_m',
         'mnli_mm'
     ]

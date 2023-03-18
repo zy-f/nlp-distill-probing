@@ -7,7 +7,9 @@ UPOS_TAGS = ['ADJ', 'ADP', 'ADV', 'AUX', 'CCONJ', 'DET', 'INTJ', 'NOUN', 'NUM', 
 UPOS_TAG_TO_ID = {UPOS_TAGS[i] : i for i in range(len(UPOS_TAGS))}
 DEP_TAGS = ['acl', 'acl:relcl', 'advcl', 'advcl:relcl', 'advmod', 'amod', 'appos', 'aux', 'aux:pass', 'case', 'cc', 'cc:preconj', 'ccomp', 'compound', 'compound:prt', 'conj', 'cop', 'csubj', 'csubj:outer', 'csubj:pass', 'dep', 'det', 'det:predet', 'discourse', 'dislocated', 'expl', 'fixed', 'flat', 'flat:foreign', 'goeswith', 'iobj', 'list', 'mark', 'nmod', 'nmod:npmod', 'nmod:poss', 'nmod:tmod', 'nsubj', 'nsubj:outer', 'nsubj:pass', 'nummod', 'obj', 'obl', 'obl:npmod', 'obl:tmod', 'orphan', 'parataxis', 'punct', 'reparandum', 'root', 'vocative', 'xcomp']
 DEP_TAG_TO_ID = {DEP_TAGS[i] : i for i in range(len(DEP_TAGS))}
+NER_TAGS = ["O", "B-PERSON", "I-PERSON", "B-NORP", "I-NORP", "B-FAC", "I-FAC", "B-ORG", "I-ORG", "B-GPE", "I-GPE", "B-LOC", "I-LOC", "B-PRODUCT", "I-PRODUCT", "B-DATE", "I-DATE", "B-TIME", "I-TIME", "B-PERCENT", "I-PERCENT", "B-MONEY", "I-MONEY", "B-QUANTITY", "I-QUANTITY", "B-ORDINAL", "I-ORDINAL", "B-CARDINAL", "I-CARDINAL", "B-EVENT", "I-EVENT", "B-WORK_OF_ART", "I-WORK_OF_ART", "B-LAW", "I-LAW", "B-LANGUAGE", "I-LANGUAGE"]
 NLI_LABEL_MAP = {'entailment': 0, 'neutral': 1, 'contradiction': 2}
+
 
 # METRICS
 def acc_func(predictions, labels):
@@ -67,7 +69,7 @@ def log_generalization_output(row_data):
     loss: loss on dataset
     acc: accuracy on dataset
     '''
-    with open('data/gen_outputs.csv', 'a') as csvfile:
+    with open('data/gen_outputs_retry.csv', 'a') as csvfile:
         fieldnames = ['dset', 'm_arch', 'm_pretrain', 'm_finetune', 'loss', 'acc']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='')
         writer.writerow(row_data)

@@ -97,12 +97,13 @@ def main():
 
     model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3)
     # model = DistilBertForSequenceClassification(DistilBertConfig(num_labels=3))
+    model.load_state_dict(torch.load('checkpoints/distilbert_distfinetune_strongDistLoss_retry.pth'))
     print('model loaded')
 
     # HYPERPARAMETERS
     hparams = DotDict(
-        lr = 5e-5,
-        n_epochs = 10,
+        lr = 1e-5,
+        n_epochs = 5,
         bsz = 64,
         distloss__dist_ce_wt=5,
         distloss__hard_ce_wt=2,
@@ -111,7 +112,7 @@ def main():
 
     device = 'cuda:0'
     # run_name = 'raw_distilbert_distfinetune_onlyDistLoss'
-    run_name = 'distilbert_distfinetune_strongDistLoss'
+    run_name = 'distilbert_distfinetune_strongDistLoss_retry'
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=hparams.lr)
     loss_func = JointDistillationLoss(dist_ce_wt=hparams.distloss__dist_ce_wt,

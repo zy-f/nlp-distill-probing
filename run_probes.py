@@ -9,7 +9,7 @@ import csv
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from utils import log_metrics, current_pst_time, acc_func, log_probe_outputs, \
-                  UPOS_TAGS, DEP_TAGS
+                  UPOS_TAGS, DEP_TAGS, NER_TAGS
 from tqdm import tqdm
 from contextlib import nullcontext
 
@@ -43,28 +43,42 @@ class ConditionalProbeDataset(Dataset):
         lbl = self.labels[i]
         return inp, lbl
 
-def get_conditional_datasets(extracts, layer, task='pos'):
+def get_conditional_datasets(model_name, layer, task='pos'):
     '''
-    task = {pos, dep}
+    task = {pos, dep, ner}
     '''
-    base_layer_train = extracts['train']['layer0']
-    base_layer_val = extracts['val']['layer0']
-    if layer == 'layer0':
-        deep_layer_train = torch.zeros_like(base_layer_train)
-        deep_layer_val = torch.zeros_like(base_layer_val)
+    if task == 'ner':
+        base_path = 'data/probe/ontoV4'
+    elif task in ['pos', 'dep']:
+        base_path = 'data/probe/ewt'
     else:
-        deep_layer_train = extracts['train'][layer]
-        deep_layer_val = extracts['val'][layer]
-    train_dset = ConditionalProbeDataset(base_layer_train, deep_layer_train, extracts['train'][f'{task}_labels'])
-    val_dset = ConditionalProbeDataset(base_layer_val, deep_layer_val, extracts['val'][f'{task}_labels'])
+        raise NotImplementedError
+    labels = torch.load(f'{base_path}/{task}_labels.ptdata')
+    base_layer = torch.load(f'{base_path}/{model_name}-layer0.ptdata')
+    if layer == 'layer0':
+        deep_layer = {'train': torch.zeros_like(base_layer['train']),
+                      'val': torch.zeros_like(base_layer['val'])
+        }
+    else:
+        deep_layer = torch.load(f'{base_path}/{model_name}-{layer}.ptdata')
+    train_dset = ConditionalProbeDataset(base_layer['train'], deep_layer['train'], labels['train'])
+    val_dset = ConditionalProbeDataset(base_layer['val'], deep_layer['val'], labels['val'])
     return train_dset, val_dset
 
-def get_individual_datasets(extracts, layer, task='pos'):
+def get_individual_datasets(model_name, layer, task='pos'):
     '''
-    task = {pos, dep}
+    task = {pos, dep, ner}
     '''
-    train_dset = torch.utils.data.TensorDataset(extracts['train'][layer], extracts['train'][f'{task}_labels'])
-    val_dset = torch.utils.data.TensorDataset(extracts['val'][layer], extracts['val'][f'{task}_labels'])
+    if task == 'ner':
+        base_path = 'data/probe/ontoV4'
+    elif task in ['pos', 'dep']:
+        base_path = 'data/probe/ewt'
+    else:
+        raise NotImplementedError
+    labels = torch.load(f'{base_path}/{task}_labels.ptdata')
+    layer_data = torch.load(f'{base_path}/{model_name}-{layer}.ptdata')
+    train_dset = torch.utils.data.TensorDataset(layer_data['train'], labels['train'])
+    val_dset = torch.utils.data.TensorDataset(layer_data['val'], labels['val'])
     return train_dset, val_dset
 
 def probe_epoch_loop(model, dl, loss_func, pbar=None, device='cpu', optimizer=None):
@@ -152,8 +166,9 @@ def run_probe(train_dset, val_dset, unique_run_name=None, hidden_size=45, n_clas
 # ==== END CODE BLOCKS ====
 
 # simple functions to run all probes
-def probe_all_layers(extract_data, model_info, probe_info, probe_dims):
-    probe_layers = [k for k in extract_data['val'].keys() if 'label' not in k]
+def probe_all_layers(layers, model_info, probe_info, probe_dims):
+    probe_layers = [f'layer{i}' for i in layers]
+    model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune']}"
     print(f'PROBING LAYERS: {probe_layers}')
     if probe_info['p_type'] == 'indiv':
         get_dataset_func = get_individual_datasets
@@ -163,7 +178,7 @@ def probe_all_layers(extract_data, model_info, probe_info, probe_dims):
         raise NotImplementedError
     layer_accs = {}
     for layer in probe_layers:
-        train_dset, val_dset = get_dataset_func(extract_data, layer, task=probe_info['p_task'])
+        train_dset, val_dset = get_dataset_func(model_name, layer, task=probe_info['p_task'])
         tstamp = current_pst_time().strftime('%Y_%m_%d-%H_%M')
         print(f"starting {layer} probe")
         best_val_acc = run_probe(train_dset, val_dset, **probe_dims)
@@ -171,45 +186,6 @@ def probe_all_layers(extract_data, model_info, probe_info, probe_dims):
         print('-'*20)
     log_probe_outputs(tstamp, model_info, probe_info, layer_accs)
 
-# def run_indiv_layer_pos_probes(data_path, model_name, probe_dims, model_info):
-#     extract_data = torch.load(data_path)
-#     probe_layers = [k for k in extract_data['val'].keys() if k not in ('labels')]
-#     print(f'PROBING LAYERS: {probe_layers}')
-#     layer_accs = []
-#     for layer in probe_layers:
-#         # initialize datasets
-#         train_dset, val_dset = get_pos_datasets(extract_data, layer)
-#         # run_name = f'pos_probe_{model_name}_{layer}'
-#         time_id = current_pst_time().strftime('%Y_%m_%d-%H_%M')
-#         # unique_run_name = f"{run_name}-{time_id}"
-#         print(f"starting {layer} probe")
-#         best_val_acc = run_probe(train_dset, val_dset, unique_run_name=unique_run_name, **probe_dims)
-#         layer_accs.append(best_val_acc)
-#         print(f"{layer} probe done" + '\n' + '-'*20)
-#     log_probe_outputs(time_id, model_info, "individual", *layer_accs)
-
-
-# def run_conditional_pos_probes(data_path, model_name, probe_dims, model_info):
-#     extract_data = torch.load(data_path)
-#     probe_layers = [k for k in extract_data['val'].keys() if k not in ('labels')]
-#     print(f'PROBING LAYERS: {probe_layers}')
-#     layer_accs = []
-#     for layer in probe_layers:
-#         # initialize datasets
-#         train_dset, val_dset = get_conditional_pos_datasets(extract_data, layer)
-#         run_name = f'pos_condprobe_{model_name}_{layer}'
-#         time_id = current_pst_time().strftime('%Y_%m_%d-%H_%M')
-#         unique_run_name = f"{run_name}-{time_id}"
-#         print(f"starting {layer} probe")
-#         best_val_acc = run_probe(train_dset, val_dset, unique_run_name=unique_run_name, **probe_dims)
-#         layer_accs.append(best_val_acc)
-#         print(f"{layer} probe done" + '\n' + '-'*20)
-    
-#     log_probe_outputs(time_id, *model_info, 'conditional', *layer_accs)
-
-
-# fieldnames = ['timestamp', 'm_arch', 'm_pretrain', 'm_finetune', 'p_type', 'p_task'] \
-#         + [f'layer{ix}' for ix in [0, 1, 4, 5, 6, 10, 11, 12]]
 '''
 timestamp: set automatically
 m_arch: model architecture -> {bert, distilbert}
@@ -225,23 +201,24 @@ probe_dims = {
 model_info = {
     'm_arch': 'distilbert',
     'm_pretrain': 'mlm',
-    'm_finetune': 'mixedmnli2',
+    'm_finetune': 'mixedmnli',
 }
 
-model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune'][:-1]}"
-data_path = f'data/probe/{model_name}-extracts.ptdata'
+model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune']}"
+print('extracting for:', model_name)
 
-print(f'loading {model_name} extract data...', end='', flush=True)
-extract_data = torch.load(data_path)
-print('extract data loaded')
-for p_task in ['pos', 'dep']:
-    for p_type in ['indiv', 'cond']:
+layers = [0, 1, 6, 10, 11, 12] if model_info['m_arch'] == 'bert' else [0, 1, 4, 5, 6]
+
+for p_task in ['ner']: #['pos', 'dep']
+    for p_type in ['indiv']:
         if p_task == 'pos':
             probe_dims['n_classes'] = len(UPOS_TAGS)
         elif p_task == 'dep':
             probe_dims['n_classes'] = len(DEP_TAGS)
+        elif p_task == 'ner':
+            probe_dims['n_classes'] = len(NER_TAGS) # from huggingface
         else:
             raise NotImplementedError
         probe_info = {'p_task': p_task, 'p_type': p_type}
         print(f'PROBING VIA {p_type.upper()} PROBE ON {p_task.upper()} LABEL')
-        probe_all_layers(extract_data, model_info, probe_info, probe_dims)
+        probe_all_layers(layers, model_info, probe_info, probe_dims)
