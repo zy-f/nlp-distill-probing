@@ -47,7 +47,7 @@ def get_conditional_datasets(model_name, layer, task='pos'):
     '''
     task = {pos, dep, ner}
     '''
-    if task == 'ner':
+    if task in ['ner']:
         base_path = 'data/probe/ontoV4'
     elif task in ['pos', 'dep']:
         base_path = 'data/probe/ewt'
@@ -199,9 +199,9 @@ probe_dims = {
     'n_classes': -1
 }
 model_info = {
-    'm_arch': 'distilbert',
+    'm_arch': 'bert',
     'm_pretrain': 'mlm',
-    'm_finetune': 'mixedmnli',
+    'm_finetune': 'none',
 }
 
 model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune']}"
@@ -209,7 +209,7 @@ print('extracting for:', model_name)
 
 layers = [0, 1, 6, 10, 11, 12] if model_info['m_arch'] == 'bert' else [0, 1, 4, 5, 6]
 
-for p_task in ['ner']: #['pos', 'dep']
+for p_task in ['pos', 'dep']: #['pos', 'dep']
     for p_type in ['indiv']:
         if p_task == 'pos':
             probe_dims['n_classes'] = len(UPOS_TAGS)
