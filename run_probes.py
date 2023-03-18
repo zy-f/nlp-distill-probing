@@ -225,10 +225,10 @@ probe_dims = {
 model_info = {
     'm_arch': 'distilbert',
     'm_pretrain': 'mlm',
-    'm_finetune': 'distmnli',
+    'm_finetune': 'mixedmnli2',
 }
 
-model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune']}"
+model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune'][:-1]}"
 data_path = f'data/probe/{model_name}-extracts.ptdata'
 
 print(f'loading {model_name} extract data...', end='', flush=True)

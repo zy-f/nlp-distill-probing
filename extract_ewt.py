@@ -47,13 +47,13 @@ class BertExtractionDataset(DistilBertExtractionDataset):
 def main():
     # === CONSTANTS (can turn into command-line args later) ===
     TOKEN_TYPE = 'bert_subwordtok_redo'
-    DATASET_CLASS = BertExtractionDataset
-    MODEL_TYPE = 'bert-base-uncased'
+    DATASET_CLASS = DistilBertExtractionDataset
+    MODEL_TYPE = 'distilbert-base-uncased'
     model = AutoModelForSequenceClassification.from_pretrained(MODEL_TYPE, num_labels=3)
-    MODEL_WEIGHTS = None#'checkpoints/bert_finetune_initial-2023_02_28-14_18.pth'
+    MODEL_WEIGHTS = 'checkpoints/distilbert_distfinetune_strongDistLoss.pth'
     bsz = 64
     device = 'cuda:0'
-    SAVE_PATH = 'data/probe/bert_mlm_none-extracts.ptdata'
+    SAVE_PATH = 'data/probe/distilbert_mlm_mixedmnli-extracts.ptdata'
     if os.path.exists(SAVE_PATH):
         print(f'WARNING: {SAVE_PATH} already exists. Are you sure you want to overwrite it?')
         if not input('[Y/N] > ').lower().startswith('y'):
@@ -88,7 +88,7 @@ def main():
         val_tok = json.load(f)
     train_dset = DATASET_CLASS(train_tok)
     val_dset = DATASET_CLASS(val_tok)
-    train_dl = DataLoader(train_dset, batch_size=bsz, shuffle=True)
+    train_dl = DataLoader(train_dset, batch_size=bsz, shuffle=False)
     val_dl = DataLoader(val_dset, batch_size=bsz, shuffle=False)
 
     if MODEL_WEIGHTS is not None:

@@ -70,17 +70,18 @@ def main():
     val_m_data = DistilBERTLikeDataset(mnli_tok['validation_matched'])
     val_mm_data = DistilBERTLikeDataset(mnli_tok['validation_mismatched'])
 
-    # model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3)
-    model = DistilBertForSequenceClassification(DistilBertConfig(num_labels=3))
+    model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3)
+    # model = DistilBertForSequenceClassification(DistilBertConfig(num_labels=3))
 
     # HYPERPARAMETERS
-    lr = 5e-5
-    n_epochs = 10
+    lr = 1e-5
+    n_epochs = 5
+    wd = 1e-5
     bsz = 64
     device = 'cuda:0'
-    run_name = 'distilbert_finetune_initial'
+    run_name = 'distilbert_finetune_retry'
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=wd)
     loss_func = nn.CrossEntropyLoss()
 
     # create dataloaders (batches and randomizes samples)

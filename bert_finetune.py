@@ -74,13 +74,14 @@ def main():
     model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=3)
 
     # HYPERPARAMETERS
-    lr = 5e-5
+    lr = 1e-5
+    wd = 1e-5
     n_epochs = 10
     bsz = 64
     device = 'cuda:0'
-    run_name = 'bert_finetune_initial'
+    run_name = 'bert_finetune_retry'
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=wd)
     loss_func = nn.CrossEntropyLoss()
 
     # create dataloaders (batches and randomizes samples)

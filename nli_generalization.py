@@ -31,6 +31,12 @@ MODEL_INFO = {
         'm_pretrain': 'mlm',
         'm_finetune': 'distmnli'
     },
+
+    'distilbert_distfinetune_strongDistLoss': {
+        'm_arch': 'distilbert',
+        'm_pretrain': 'mlm',
+        'm_finetune': 'mixedmnli'
+    },
 }
 
 def get_dataset(dset):
@@ -46,12 +52,12 @@ def get_dataset(dset):
             return ex
         jamnli_tok = jamnli_tok.map(numerically_label)
         full_data_tok = jamnli_tok['train']
-    elif dset == 'snli':
+    elif dset in 'snli':
         snli_raw = load_dataset("snli")
         snli_tok = snli_raw.map(tok_func, batched=True)
         full_data_tok = concatenate_datasets([snli_tok['train'], snli_tok['validation'], snli_tok['test']])
         full_data_tok = full_data_tok.filter(lambda ex: ex['label'] != -1) # remove weird label cases
-    elif dset.startswith('anli'):
+    elif dset == 'anli':
         anli_raw = load_dataset("anli")
         anli_tok = anli_raw.map(tok_func, batched=True)
         full_data_tok = concatenate_datasets(list(anli_tok.values()))
@@ -70,6 +76,16 @@ def get_dataset(dset):
             full_data_tok['label'].append(NLI_LABEL_MAP[ex['label']])
             for k, v in tok_func(ex).items():
                 full_data_tok[k].append(v)
+    elif dset == 'hans':
+        hans_raw = load_dataset("hans")
+        hans_tok = hans_raw.map(tok_func, batched=True)
+        full_data_tok = concatenate_datasets(list(hans_tok.values()))
+    elif dset == 'mnli_m':
+        raw = load_dataset('multi_nli')
+        full_data_tok = raw.map(tok_func, batched=True)['validation_matched']
+    elif dset == 'mnli_mm':
+        raw = load_dataset('multi_nli')
+        full_data_tok = raw.map(tok_func, batched=True)['validation_mismatched']
     else:
         raise NotImplementedError
     return full_data_tok
@@ -112,13 +128,27 @@ def evaluate_on(full_data_tok, model_file, log_info):
 def main(dset='anli'):
     full_data_tok = get_dataset(dset)
     models = [
-        'bert_finetune_initial',
-        'distilbert_finetune_initial',
-        'distilbert_distfinetune_onlyDistLoss'
+        'bert_finetune_retry',
+        # 'distilbert_finetune_initial',
+        # 'distilbert_distfinetune_onlyDistLoss',
+        # 'distilbert_distfinetune_strongDistLoss'
     ]
     for model_file in models:
         log_info = {'dset': dset, **MODEL_INFO[model_file]}
         evaluate_on(full_data_tok, model_file, log_info)
 
 if __name__ == '__main__':
-    main()
+    dsets = [
+        # 'dnc-comparatives', 
+        # 'dnc-prepositions',
+        # 'dnc-quantification',
+        # 'dnc-spatial',
+        # 'jam',
+        # 'snli',
+        # 'anli',
+        # 'hans',
+        'mnli_m',
+        'mnli_mm'
+    ]
+    for d in dsets:
+        main(dset=d)

@@ -32,7 +32,7 @@ def main():
     device = 'cuda:0'
     
     model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=3)
-    model.load_state_dict(torch.load('checkpoints/bert_finetune_initial-2023_02_28-14_18.pth'))
+    model.load_state_dict(torch.load('checkpoints/bert_finetune_retry.pth'))
     print('model finetune weights loaded')
     
     model.eval()
