@@ -2,6 +2,10 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from datasets import load_dataset
 import json
 from collections import OrderedDict
+# access to parent directory
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from bert_finetune import BERTLikeDataset
 from utils import UPOS_TAGS, UPOS_TAG_TO_ID, DEP_TAGS, DEP_TAG_TO_ID
 
