@@ -14,13 +14,13 @@ from distilbert_finetune import DistilBERTLikeDataset, distilbert_epoch_loop
 import json
 
 MODEL_INFO = {
-    'bert_finetune': {
+    'bert_finetune_old': {
         'm_arch': 'bert',
         'm_pretrain': 'mlm',
         'm_finetune': 'mnli'
     },
 
-    'distilbert_finetune': {
+    'distilbert_finetune_old': {
         'm_arch': 'distilbert',
         'm_pretrain': 'mlm',
         'm_finetune': 'mnli'
@@ -32,7 +32,7 @@ MODEL_INFO = {
     #     'm_finetune': 'distmnli'
     # },
 
-    'distilbert_distfinetune_strongDistLoss': {
+    'distilbert_distfinetune_strongDistLoss_old': {
         'm_arch': 'distilbert',
         'm_pretrain': 'mlm',
         'm_finetune': 'mixedmnli'
@@ -128,10 +128,9 @@ def evaluate_on(full_data_tok, model_file, log_info):
 def main(dset='anli'):
     full_data_tok = get_dataset(dset)
     models = [
-        # 'bert_finetune',
-        # 'distilbert_finetune',
-        # 'distilbert_distfinetune_onlyDistLoss',
-        'distilbert_distfinetune_strongDistLoss'
+        'bert_finetune_old',
+        'distilbert_finetune_old',
+        'distilbert_distfinetune_strongDistLoss_old'
     ]
     for model_file in models:
         log_info = {'dset': dset, **MODEL_INFO[model_file]}
@@ -139,16 +138,17 @@ def main(dset='anli'):
 
 if __name__ == '__main__':
     dsets = [
+        'dnc-negation'
         # 'dnc-comparatives', 
         # 'dnc-prepositions',
         # 'dnc-quantification',
         # 'dnc-spatial',
         # 'jam',
         # 'snli',
-        'anli',
-        'hans',
-        'mnli_m',
-        'mnli_mm'
+        # 'anli',
+        # 'hans',
+        # 'mnli_m',
+        # 'mnli_mm'
     ]
     for d in dsets:
         main(dset=d)

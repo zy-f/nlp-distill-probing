@@ -69,7 +69,7 @@ def log_generalization_output(row_data):
     loss: loss on dataset
     acc: accuracy on dataset
     '''
-    with open('data/gen_outputs_retry.csv', 'a') as csvfile:
+    with open('data/gen_outputs_old.csv', 'a') as csvfile:
         fieldnames = ['dset', 'm_arch', 'm_pretrain', 'm_finetune', 'loss', 'acc']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='')
         writer.writerow(row_data)
