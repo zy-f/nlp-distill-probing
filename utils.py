@@ -53,7 +53,7 @@ def log_probe_outputs(timestamp, model_info, probe_info, layer_data):
     p_type: type of probe -> {indiv, cond}
     p_task: probe prediction task/label -> {pos, dep}
     '''
-    with open('data/probe_outputs.csv', 'a') as csvfile:
+    with open('data/probe_outputs_old.csv', 'a') as csvfile:
         fieldnames = ['timestamp', 'm_arch', 'm_pretrain', 'm_finetune', 'p_type', 'p_task'] \
         + [f'layer{ix}' for ix in [0, 1, 4, 5, 6, 10, 11, 12]]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, restval='')

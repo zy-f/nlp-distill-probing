@@ -139,36 +139,36 @@ def main(\
 
 if __name__ == '__main__':
     kwargs_sets = [
+        # dict(
+        #     DATASET_CLASS = BertExtractionDataset,
+        #     MODEL_TYPE = 'bert-base-uncased',
+        #     MODEL_WEIGHTS = None,
+        #     SAVE_BASE = 'data/probe/ontoV4/bert_mlm_none'
+        # ),
         dict(
             DATASET_CLASS = BertExtractionDataset,
             MODEL_TYPE = 'bert-base-uncased',
-            MODEL_WEIGHTS = None,
-            SAVE_BASE = 'data/probe/ewt/bert_mlm_none'
-        ),
-        dict(
-            DATASET_CLASS = BertExtractionDataset,
-            MODEL_TYPE = 'bert-base-uncased',
-            MODEL_WEIGHTS = 'checkpoints/bert_finetune.pth',
-            SAVE_BASE = 'data/probe/ewt/bert_mlm_mnli'
+            MODEL_WEIGHTS = 'checkpoints/bert_finetune_old.pth',
+            SAVE_BASE = 'data/probe/ontoV4/bert_mlm_mnli'
         ),
         # dict(
         #     DATASET_CLASS = DistilBertExtractionDataset,
         #     MODEL_TYPE = 'distilbert-base-uncased',
         #     MODEL_WEIGHTS = None,
-        #     SAVE_BASE = 'data/probe/ewt/distilbert_mlm_none'
+        #     SAVE_BASE = 'data/probe/ontoV4/distilbert_mlm_none'
         # ),
-        # dict(
-        #     DATASET_CLASS = DistilBertExtractionDataset,
-        #     MODEL_TYPE = 'distilbert-base-uncased',
-        #     MODEL_WEIGHTS = 'checkpoints/distilbert_finetune.pth',
-        #     SAVE_BASE = 'data/probe/ewt/distilbert_mlm_mnli'
-        # ),
-        # dict(
-        #     DATASET_CLASS = DistilBertExtractionDataset,
-        #     MODEL_TYPE = 'distilbert-base-uncased',
-        #     MODEL_WEIGHTS = 'checkpoints/distilbert_distfinetune_strongDistLoss.pth',
-        #     SAVE_BASE = 'data/probe/ewt/distilbert_mlm_mixedmnli'
-        # ),
+        dict(
+            DATASET_CLASS = DistilBertExtractionDataset,
+            MODEL_TYPE = 'distilbert-base-uncased',
+            MODEL_WEIGHTS = 'checkpoints/distilbert_finetune_old.pth',
+            SAVE_BASE = 'data/probe/ontoV4/distilbert_mlm_mnli'
+        ),
+        dict(
+            DATASET_CLASS = DistilBertExtractionDataset,
+            MODEL_TYPE = 'distilbert-base-uncased',
+            MODEL_WEIGHTS = 'checkpoints/distilbert_distfinetune_strongDistLoss_old.pth',
+            SAVE_BASE = 'data/probe/ontoV4/distilbert_mlm_mixedmnli'
+        ),
     ]
     for kwargs in kwargs_sets:
-        main(**kwargs, DATASET_BASE='data/UD_English-EWT/en_ewt-ud', overwrite=False)
+        main(**kwargs, DATASET_BASE='data/ontonotes/ontonotes', overwrite=False)

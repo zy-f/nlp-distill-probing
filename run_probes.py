@@ -199,9 +199,9 @@ probe_dims = {
     'n_classes': -1
 }
 model_info = {
-    'm_arch': 'bert',
+    'm_arch': 'distilbert',
     'm_pretrain': 'mlm',
-    'm_finetune': 'none',
+    'm_finetune': 'mixedmnli',
 }
 
 model_name = f"{model_info['m_arch']}_{model_info['m_pretrain']}_{model_info['m_finetune']}"
@@ -209,8 +209,8 @@ print('extracting for:', model_name)
 
 layers = [0, 1, 6, 10, 11, 12] if model_info['m_arch'] == 'bert' else [0, 1, 4, 5, 6]
 
-for p_task in ['pos', 'dep']: #['pos', 'dep']
-    for p_type in ['indiv']:
+for p_task in ['ner']: #['pos', 'dep']
+    for p_type in ['indiv', 'cond']:
         if p_task == 'pos':
             probe_dims['n_classes'] = len(UPOS_TAGS)
         elif p_task == 'dep':
