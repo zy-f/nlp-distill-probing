@@ -1,5 +1,6 @@
 # byte_compiled
 __pycache__/
+.DS_Store
 
 # jupyter
 .ipynb_checkpoints
@@ -7,6 +8,7 @@ __pycache__/
 # project-specific logs and data
 checkpoints/
 logs/
+figs/
 data/*/
 # ^ note: keeps the probe_outputs file
 
